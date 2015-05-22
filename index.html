@@ -66,7 +66,7 @@
       });
 
       socket.on('usernames', function(data) {
-        var html = '';
+        var html = '<b>' + 'Online users:' + '</b>' + '<br>';
         for(i=0; i < data.length; i++){
           html += data[i] + '<br/>'
         }
