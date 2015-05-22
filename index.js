@@ -13,7 +13,7 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
   console.log('a user connected');
-  
+
   socket.on('new user', function(data, callback) {
     if (usernames.indexOf(data) != -1){
       callback(false);
@@ -21,12 +21,22 @@ io.on('connection', function(socket){
       callback(true);
       socket.username = data;
       usernames.push(socket.username);
-      io.emit('usernames', usernames);
+      updateUsernames();
     }
   });
 
-  socket.on('send message', function(msg){
-    console.log('message: ' + msg);
-    io.emit('send message', msg);
+  function updateUsernames() {
+    io.emit('usernames', usernames);
+  };
+
+  socket.on('send message', function(data){
+    console.log('message: ' + data);
+    io.emit('new message', {msg: data, user: socket.username});
+  });
+
+  socket.on('disconnect', function(data) {
+    if(!socket.username) return;
+    usernames.splice(usernames.indexOf(socket.username), 1);
+    updateUsernames();
   });
 });

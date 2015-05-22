@@ -30,25 +30,27 @@
   <div id="contentWrap">
     <div id="chatWrap">
       <div id="chat"></div>
-        <ul id="messages"></ul>
-        <form action="">
-          <input id="messageBox" autocomplete="off" /><button>Send</button>
+        <form id="send-message"></ul>
+          <input size="35" id="message"></input>
+          <input type="submit">Send</input>
         </form>
     </div>
     <div id="users"></div>
   </div>
 
-
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
+
       var socket = io();
-      var $messageBox = $('#messageBox');
-      var $messages = $('#messages');
       var $usernameForm = $('#setUsername');
       var $usernameError = $('#usernameError');
       var $usernameBox = $('#username');
+      var $users = $('#users');
+      var $messageForm = $('#send-message');
+      var $messageBox = $('#message');
+      var $chat = $('#chat');
 
       $usernameForm.submit(function(e){
         e.preventDefault();
@@ -63,20 +65,23 @@
         $usernameBox.val('');
       });
 
-      socket.on('usernames', function() {
-        
+      socket.on('usernames', function(data) {
+        var html = '';
+        for(i=0; i < data.length; i++){
+          html += data[i] + '<br/>'
+        }
+        $users.html(html)
       });
 
-      $('form').submit(function(e){
+      $messageForm.submit(function(e){
         e.preventDefault();
         socket.emit('send message', $messageBox.val());
         $messageBox.val('');
-        return false;
       });
-      socket.on('send message', function(msg){
-        $messages.append($('<li>').text(msg));
+
+      socket.on('new message', function(data){
+        $chat.append('<b>' + data.user + ': </b>' + data.msg + "<br/>");
       });
   </script>
 </body>
-
 </html>
