@@ -30,7 +30,12 @@ app.get('/', function(req, res){
 });  
 
 io.on('connection', function(socket){
-  console.log('a user connected');
+  Chat.find({}, function(err, docs){
+    if(err) throw err;
+    console.log('sending old messages')
+    socket.emit('load old msgs', docs);
+  });
+
   socket.on('new user', function(data, callback) {
     if (data in users) {
       callback(false);
