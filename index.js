@@ -1,11 +1,29 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var mongoose = require('mongoose');
 var users = {};
+
 
 http.listen(4000, function(){
   console.log('Listening on Port 4000');
 });
+
+mongoose.connect('mongodb://localhost/socketChat', function(err){
+  if(err){
+    console.log(err);
+  } else{
+    console.log('Connected to MongoDB'); 
+  }
+});
+
+var chatSchema = mongoose.Schema({ 
+  user: String,
+  msg: String,
+  created: {type: Date, default: Date.now}
+});
+
+var Chat = mongoose.model('Message', chatSchema);
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -30,7 +48,7 @@ io.on('connection', function(socket){
 
   socket.on('send message', function(data, callback){
     var msg = data.trim();
-    if(msg.substr(0,3) === '/w '){
+    if(msg.substr(0,3) === '/w '){ //whispers block
       msg = msg.substr(3);
       var ind = msg.indexOf(' ');
       if(ind !== -1){
@@ -46,7 +64,11 @@ io.on('connection', function(socket){
         callback('Error! Please enter whisper message')
       } 
     } else{
-        io.emit('new message', {msg: msg, user: socket.username});
+        var newMsg = new Chat({msg: msg, user: socket.username});
+        newMsg.save(function(err){
+          if(err) throw err;
+        });
+        io.emit('new message', {msg: msg, user: socket.username}); //actual messages
       }
   });
 
