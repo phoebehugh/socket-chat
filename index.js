@@ -30,10 +30,10 @@ app.get('/', function(req, res){
 });  
 
 io.on('connection', function(socket){
-  Chat.find({}, function(err, docs){
-    if(err) throw err;
-    console.log('sending old messages')
-    socket.emit('load old msgs', docs);
+  var query = Chat.find({}); 
+    query.sort('-created').limit(8).exec(function(err, docs){
+      if(err) throw err;
+      socket.emit('load old msgs', docs);
   });
 
   socket.on('new user', function(data, callback) {
