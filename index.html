@@ -13,6 +13,13 @@
         float:left;
         border: 1px #000 solid;
       }
+      .error{
+        color: red;
+      }
+      .private{
+        color: gray;
+        font-style: italic;
+      }
     </style>
   </head>
 
@@ -32,7 +39,7 @@
       <div id="chat"></div>
         <form id="send-message"></ul>
           <input size="35" id="message"></input>
-          <input type="submit">Send</input>
+          <input type="submit"></input>
         </form>
     </div>
     <div id="users"></div>
@@ -75,12 +82,18 @@
 
       $messageForm.submit(function(e){
         e.preventDefault();
-        socket.emit('send message', $messageBox.val());
+        socket.emit('send message', $messageBox.val(), function(data) {
+          $chat.append('<span class="error"><b>' + data + "</span><br/>");
+        });
         $messageBox.val('');
       });
 
       socket.on('new message', function(data){
-        $chat.append('<b>' + data.user + ': </b>' + data.msg + "<br/>");
+        $chat.append('<span class="msg"><b>' + data.user + ': </b>' + data.msg + "</span><br/>");
+      });
+
+      socket.on('private message', function(data) {
+        $chat.append('<span class="private message"><b>' + data.user + ': </b>' + data.msg + "</span><br/>");
       });
   </script>
 </body>
