@@ -4,7 +4,6 @@ var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 var users = {};
 
-
 http.listen(4000, function(){
   console.log('Listening on Port 4000');
 });
